@@ -10,3 +10,24 @@ LEFT JOIN products ON products.product_id = sales.product_id
 GROUP BY CONCAT_WS(' ', employees.first_name, employees.last_name)
 order by income desc
 limit 10;
+
+
+
+--Второй отчет содержит информацию о продавцах, чья выручка меньше средней выручки по всем продавцам. Таблица отсортирована по выручке по возрастанию.
+
+--name — имя и фамилия продавца
+--average_income — средняя выручка продавца за все время с округлением до целого
+
+SELECT CONCAT_WS(' ', employees.first_name, employees.last_name) AS name, ROUND(SUM(sales.quantity * products.price)) AS average_income
+FROM sales
+LEFT JOIN employees ON employees.employee_id = sales.sales_person_id
+LEFT JOIN products ON products.product_id = sales.product_id 
+GROUP BY employees.employee_id
+HAVING SUM(sales.quantity * products.price) < 
+       (SELECT AVG(total_income) FROM
+           (SELECT SUM(sales.quantity * products.price) AS total_income
+            FROM sales
+            LEFT JOIN employees ON employees.employee_id = sales.sales_person_id
+            LEFT JOIN products ON products.product_id = sales.product_id 
+            GROUP BY sales.sales_person_id) AS subquery)
+order by 2;
