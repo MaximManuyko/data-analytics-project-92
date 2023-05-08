@@ -1,8 +1,9 @@
 "customers_count"
 19759
-
+---------------------
 
 --Подготовьте в файл top_10_total_income.csv отчет с продавцами у которых наибольшая выручка
+
 SELECT CONCAT_WS(' ', employees.first_name, employees.last_name) AS name, COUNT(*) AS operations, SUM(sales.quantity * products.price) AS income
   FROM sales
   LEFT JOIN employees ON employees.employee_id = sales.sales_person_id
@@ -10,11 +11,10 @@ SELECT CONCAT_WS(' ', employees.first_name, employees.last_name) AS name, COUNT(
  GROUP BY CONCAT_WS(' ', employees.first_name, employees.last_name)
  order by income desc
  limit 10;
-
+---------------------
 
 
 --Второй отчет содержит информацию о продавцах, чья выручка меньше средней выручки по всем продавцам. Таблица отсортирована по выручке по возрастанию.
-
 --name — имя и фамилия продавца
 --average_income — средняя выручка продавца за все время с округлением до целого
 
@@ -31,10 +31,9 @@ HAVING SUM(sales.quantity * products.price) <
             LEFT JOIN products ON products.product_id = sales.product_id 
             GROUP BY sales.sales_person_id) AS subquery)
 order by 2;
-
+---------------------
 
 --Третий отчет содержит информацию о выручке по дням недели. Каждая запись содержит имя и фамилию продавца, день недели и суммарную выручку. Отсортируйте данные по порядковому номеру дня недели и name
-
 --name — имя и фамилия продавца
 --weekday — название дня недели на английском языке
 --income — суммарная выручка продавца в определенный день недели, округленная до целого числа
@@ -66,15 +65,11 @@ FROM (
     e.first_name, e.last_name, weekday, number
   ORDER BY 4, 1
 ) as t
-
+---------------------
 
 --Первый отчет - количество покупателей в разных возрастных группах: 10-15, 16-25, 26-40 и 40+. Итоговая таблица должна быть отсортирована по возрастным группам и содержать следующие поля:
-
 --age_category - возрастная группа
 --count - количество человек в группе
-
-
-
 
 
 SELECT 
@@ -97,3 +92,25 @@ GROUP BY
     age_categories.age_category 
 ORDER BY 
     age_categories.age_category ASC;
+---------------------
+
+--Во втором отчете предоставьте данные по количеству уникальных покупателей и выручке, которую они принесли. Сгруппируйте данные по дате, которая представлена в числовом виде ГОД-МЕСЯЦ. Итоговая таблица должна быть отсортирована по дате по возрастанию и содержать следующие поля:
+--date - дата в указанном формате
+--total_customers - количество покупателей
+--income - принесенная выручка
+
+
+
+SELECT 
+    TO_CHAR(DATE_TRUNC('month', sale_date), 'YYYY-MM') AS date,
+    COUNT(customer_id) AS total_customers,
+    SUM(quantity * price) AS income
+FROM 
+    sales
+LEFT JOIN 
+    products ON sales.product_id = products.product_id 
+GROUP BY 
+    DATE_TRUNC('month', sale_date)
+ORDER BY 
+    date ASC;
+---------------------
