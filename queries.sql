@@ -66,3 +66,34 @@ FROM (
     e.first_name, e.last_name, weekday, number
   ORDER BY 4, 1
 ) as t
+
+
+--Первый отчет - количество покупателей в разных возрастных группах: 10-15, 16-25, 26-40 и 40+. Итоговая таблица должна быть отсортирована по возрастным группам и содержать следующие поля:
+
+--age_category - возрастная группа
+--count - количество человек в группе
+
+
+
+
+
+SELECT 
+    age_categories.age_category,
+    COALESCE(COUNT(customers.age), 0) AS count
+FROM 
+    (SELECT '10-15' AS age_category
+     UNION SELECT '16-25'
+     UNION SELECT '26-40'
+     UNION SELECT '40+') AS age_categories
+LEFT JOIN 
+    customers ON 
+    CASE 
+        WHEN customers.age BETWEEN 10 AND 15 THEN '10-15' 
+        WHEN customers.age BETWEEN 16 AND 25 THEN '16-25' 
+        WHEN customers.age BETWEEN 26 AND 40 THEN '26-40' 
+        ELSE '40+' 
+    END = age_categories.age_category
+GROUP BY 
+    age_categories.age_category 
+ORDER BY 
+    age_categories.age_category ASC;
