@@ -114,3 +114,33 @@ GROUP BY
 ORDER BY 
     date ASC;
 ---------------------
+
+--Третий отчет следует составить о покупателях, первая покупка которых была в ходе проведения акций (акционные товары отпускали со стоимостью равной 0). Итоговая таблица должна быть отсортирована по id покупателя и дате покупки. Таблица состоит из следующих полей:
+--customer - имя и фамилия покупателя
+--sale_date - дата покупки
+--seller - имя и фамилия продавца
+
+SELECT 
+    sub.customer,
+    sub.sale_date,
+    sub.seller
+FROM 
+    (
+        SELECT 
+            CONCAT(c.first_name, ' ', c.last_name) AS customer,
+            s.sale_date,
+            CONCAT(e.first_name, ' ', e.last_name) AS seller,
+            ROW_NUMBER() OVER (PARTITION BY c.customer_id ORDER BY s.sale_date) AS rn
+        FROM 
+            sales s
+            INNER JOIN customers c ON s.customer_id = c.customer_id
+            INNER JOIN employees e ON s.sales_person_id = e.employee_id
+            INNER JOIN products p ON s.product_id = p.product_id
+        WHERE 
+            p.price = 0
+    ) sub
+WHERE 
+    sub.rn = 1
+ORDER BY 
+    sub.customer, sub.sale_date;
+    ---------------------
