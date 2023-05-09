@@ -34,28 +34,9 @@ SELECT  CONCAT_WS(' ', employees.first_name, employees.last_name) AS name,
 ---------------------
 
 
---Второй отчет содержит информацию о продавцах, чья выручка меньше средней выручки по всем продавцам. Таблица отсортирована по выручке по возрастанию.
+--Второй отчет содержит информацию о продавцах, чья средняя выручка за сделку меньше средней выручки за сделку по всем продавцам. Таблица отсортирована по выручке по возрастанию.
 --name — имя и фамилия продавца
---average_income — средняя выручка продавца за все время с округлением до целого
-
---Вариант первый, где считается сумма всех продаж продавца и выбираются только те продавцы у которых выручка выше средней по всем продавцам  
-SELECT CONCAT_WS(' ', employees.first_name, employees.last_name) AS name, 
-ROUND(SUM(sales.quantity * products.price)) AS average_income
-FROM sales
-LEFT JOIN employees ON employees.employee_id = sales.sales_person_id
-LEFT JOIN products ON products.product_id = sales.product_id 
-GROUP BY employees.employee_id
-HAVING SUM(sales.quantity * products.price) < 
-       (SELECT AVG(total_income) FROM
-           (SELECT SUM(sales.quantity * products.price) AS total_income
-            FROM sales
-            LEFT JOIN employees ON employees.employee_id = sales.sales_person_id
-            LEFT JOIN products ON products.product_id = sales.product_id 
-            GROUP BY sales.sales_person_id) AS subquery)
-order by 2;
-
---Вариант второй, где вначале считается средняя сумма продажи каждого продавца(общая выручкка продавца делится на количество продаж(чеков)) и 
---выбираются продавци у которых средняя сумма продажи выше средней суммы средней продажи всех продавцов  
+--average_income — средняя выручка продавца за сделку с округлением до целого
 
 WITH subquery AS (
   SELECT first_name || ' ' || last_name AS name,
