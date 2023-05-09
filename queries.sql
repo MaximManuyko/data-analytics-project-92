@@ -1,14 +1,34 @@
-"customers_count"
-19759
+--Напишите запрос, который считает общее количество покупателей. Назовите колонку customers_count
+
+select count(1) as customers_count
+from customers;
 ---------------------
 
---Подготовьте в файл top_10_total_income.csv отчет с продавцами у которых наибольшая выручка
+--Первый отчет о десятке лучших продавцов. Таблица состоит из трех колонок - данных о продавце, суммарной выручке с проданных товаров и количестве проведенных сделок, и отсортирована по убыванию выручки:
 
-SELECT CONCAT_WS(' ', employees.first_name, employees.last_name) AS name, COUNT(*) AS operations, SUM(sales.quantity * products.price) AS income
+--name — имя и фамилия продавца
+--operations - количество проведенных сделок
+--income — суммарная выручка продавца за все время
+
+--Вариант 1
+SELECT  CONCAT_WS(' ', employees.first_name, employees.last_name) AS name,
+        COUNT(*) AS operations, 
+        SUM(sales.quantity * products.price) AS income
   FROM sales
   LEFT JOIN employees ON employees.employee_id = sales.sales_person_id
   LEFT JOIN products ON products.product_id = sales.product_id 
  GROUP BY CONCAT_WS(' ', employees.first_name, employees.last_name)
+ order by income desc
+ limit 10;
+
+--Вариант 2
+ SELECT  employees.first_name|| ' ' ||employees.last_name AS name,
+        COUNT(*) AS operations, 
+        SUM(sales.quantity * products.price) AS income
+  FROM sales
+  LEFT JOIN employees ON employees.employee_id = sales.sales_person_id
+  LEFT JOIN products ON products.product_id = sales.product_id 
+ GROUP BY employees.first_name|| ' ' ||employees.last_name
  order by income desc
  limit 10;
 ---------------------
@@ -18,7 +38,9 @@ SELECT CONCAT_WS(' ', employees.first_name, employees.last_name) AS name, COUNT(
 --name — имя и фамилия продавца
 --average_income — средняя выручка продавца за все время с округлением до целого
 
-SELECT CONCAT_WS(' ', employees.first_name, employees.last_name) AS name, ROUND(SUM(sales.quantity * products.price)) AS average_income
+--Вариант первый, где считается сумма всех продаж продавца и выбираются только те продавцы у которых выручка выше средней по всем продавцам  
+SELECT CONCAT_WS(' ', employees.first_name, employees.last_name) AS name, 
+ROUND(SUM(sales.quantity * products.price)) AS average_income
 FROM sales
 LEFT JOIN employees ON employees.employee_id = sales.sales_person_id
 LEFT JOIN products ON products.product_id = sales.product_id 
@@ -31,6 +53,22 @@ HAVING SUM(sales.quantity * products.price) <
             LEFT JOIN products ON products.product_id = sales.product_id 
             GROUP BY sales.sales_person_id) AS subquery)
 order by 2;
+
+--Вариант второй, где вначале считается средняя сумма продажи каждого продавца(общая выручкка продавца делится на количество продаж(чеков)) и 
+--выбираются продавци у которых средняя сумма продажи выше средней суммы средней продажи всех продавцов  
+
+WITH subquery AS (
+  SELECT first_name || ' ' || last_name AS name,
+         ROUND(AVG(quantity * price), 0) AS average_income
+  FROM sales
+  LEFT JOIN employees ON employees.employee_id = sales.sales_person_id 
+  LEFT JOIN products ON products.product_id = sales.product_id 
+  GROUP BY first_name || ' ' || last_name
+)
+SELECT name, average_income
+FROM subquery
+WHERE average_income > (SELECT AVG(average_income) FROM subquery)
+ORDER BY average_income;
 ---------------------
 
 --Третий отчет содержит информацию о выручке по дням недели. Каждая запись содержит имя и фамилию продавца, день недели и суммарную выручку. Отсортируйте данные по порядковому номеру дня недели и name
