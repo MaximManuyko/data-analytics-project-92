@@ -95,8 +95,7 @@ SELECT
     age_categories.age_category,
     COALESCE(COUNT(customers.age), 0) AS count
 FROM 
-    (SELECT '10-15' AS age_category
-     UNION SELECT '16-25'
+    (SELECT '16-25' AS age_category
      UNION SELECT '26-40'
      UNION SELECT '40+') AS age_categories
 LEFT JOIN 
