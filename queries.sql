@@ -101,7 +101,6 @@ FROM
 LEFT JOIN 
     customers ON 
     CASE 
-        WHEN customers.age BETWEEN 10 AND 15 THEN '10-15' 
         WHEN customers.age BETWEEN 16 AND 25 THEN '16-25' 
         WHEN customers.age BETWEEN 26 AND 40 THEN '26-40' 
         ELSE '40+' 
