@@ -48,7 +48,7 @@ WITH subquery AS (
 )
 SELECT name, average_income
 FROM subquery
-WHERE average_income > (SELECT AVG(average_income) FROM subquery)
+WHERE average_income < (SELECT AVG(average_income) FROM subquery)
 ORDER BY average_income;
 ---------------------
 
