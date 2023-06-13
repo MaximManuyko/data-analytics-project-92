@@ -14,23 +14,23 @@ from customers;
 SELECT  CONCAT_WS(' ', employees.first_name, employees.last_name) AS name,
         COUNT(*) AS operations, 
         SUM(sales.quantity * products.price) AS income
-    FROM sales
-    LEFT JOIN employees ON employees.employee_id = sales.sales_person_id
-    LEFT JOIN products ON products.product_id = sales.product_id 
-    GROUP BY CONCAT_WS(' ', employees.first_name, employees.last_name)
-    order by income desc
-    limit 10;
+FROM sales
+LEFT JOIN employees ON employees.employee_id = sales.sales_person_id
+LEFT JOIN products ON products.product_id = sales.product_id 
+GROUP BY CONCAT_WS(' ', employees.first_name, employees.last_name)
+order by income desc
+limit 10;
 
 --Вариант 2
-    SELECT  employees.first_name|| ' ' ||employees.last_name AS name,
+SELECT  employees.first_name|| ' ' ||employees.last_name AS name,
         COUNT(*) AS operations, 
         SUM(sales.quantity * products.price) AS income
-    FROM sales
-    LEFT JOIN employees ON employees.employee_id = sales.sales_person_id
-    LEFT JOIN products ON products.product_id = sales.product_id 
-    GROUP BY employees.first_name|| ' ' ||employees.last_name
-    order by income desc
-    limit 10;
+FROM sales
+LEFT JOIN employees ON employees.employee_id = sales.sales_person_id
+LEFT JOIN products ON products.product_id = sales.product_id 
+GROUP BY employees.first_name|| ' ' ||employees.last_name
+order by income desc
+limit 10;
 ---------------------
 
 
@@ -40,7 +40,7 @@ SELECT  CONCAT_WS(' ', employees.first_name, employees.last_name) AS name,
 
 WITH subquery AS (
     SELECT first_name || ' ' || last_name AS name,
-         ROUND(AVG(quantity * price), 0) AS average_income
+            ROUND(AVG(quantity * price), 0) AS average_income
     FROM sales
     LEFT JOIN employees ON employees.employee_id = sales.sales_person_id 
     LEFT JOIN products ON products.product_id = sales.product_id 
