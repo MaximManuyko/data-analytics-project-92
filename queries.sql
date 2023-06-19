@@ -119,15 +119,15 @@ ORDER BY
 
 
 SELECT 
-    TO_CHAR(DATE_TRUNC('month', sale_date), 'YYYY-MM') AS date,
-    COUNT(customer_id) AS total_customers,
-    SUM(quantity * price) AS income
+    TO_CHAR(DATE_TRUNC('month', s.sale_date), 'YYYY-MM') AS date,
+    COUNT(DISTINCT s.customer_id) AS total_customers,
+    SUM(s.quantity * p.price) AS income
 FROM 
-    sales
+    sales s
 LEFT JOIN 
-    products ON sales.product_id = products.product_id 
+    products p ON s.product_id = p.product_id 
 GROUP BY 
-    DATE_TRUNC('month', sale_date)
+    DATE_TRUNC('month', s.sale_date)
 ORDER BY 
     date ASC;
 ---------------------
@@ -160,4 +160,23 @@ WHERE
     sub.rn = 1
 ORDER BY 
     sub.customer, sub.sale_date;
+
+
+--Второй вариант
+SELECT DISTINCT ON (c.customer_id)
+    c.first_name || ' ' || c.last_name AS customer,
+    s.sale_date,
+    e.first_name || ' ' || e.last_name AS seller
+FROM
+    sales s
+LEFT JOIN
+    customers c ON c.customer_id = s.customer_id
+LEFT JOIN
+    employees e ON e.employee_id = s.sales_person_id
+LEFT JOIN
+    products p ON p.product_id = s.product_id
+WHERE
+    p.price = 0
+ORDER BY
+    c.customer_id, s.sale_date;
     ---------------------
