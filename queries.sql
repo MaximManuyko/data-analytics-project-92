@@ -57,6 +57,42 @@ ORDER BY average_income;
 --weekday — название дня недели на английском языке
 --income — суммарная выручка продавца в определенный день недели, округленная до целого числа
 
+WITH 
+    tab_1 AS (
+        SELECT
+            s.*,
+            e.first_name || ' ' || e.last_name AS salesperson,
+            c.first_name || ' ' || c.last_name AS customer,
+            s.quantity * p.price AS total_sum,
+            to_char(s.sale_date, 'ID') AS number_of_day_week,
+            to_char(s.sale_date, 'Day') AS day_week
+        FROM
+            sales s
+            LEFT JOIN customers c ON c.customer_id = s.customer_id
+            LEFT JOIN employees e ON e.employee_id = s.sales_person_id
+            LEFT JOIN products p ON p.product_id = s.product_id
+    ),
+    tab_2 AS (
+        SELECT
+            salesperson,
+            number_of_day_week,
+            day_week,
+            SUM(total_sum)
+        FROM
+            tab_1
+        GROUP BY
+            salesperson,
+            number_of_day_week,
+            day_week
+        ORDER BY
+            number_of_day_week,
+            salesperson
+    )
+select
+	salesperson as name,
+	day_week as weekday,
+	ROUND(sum, 0) as income
+FROM tab_2;
 
 SELECT 
     name,
