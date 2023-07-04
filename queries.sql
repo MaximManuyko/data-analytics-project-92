@@ -128,24 +128,24 @@ FROM (
 --count - количество человек в группе
 
 
+WITH tab_1 AS 
+(
+    SELECT 
+    *,
+        CASE 
+	        WHEN age BETWEEN 0 AND 15 THEN '15-'
+            WHEN age BETWEEN 16 AND 25 THEN '16-25' 
+            WHEN age BETWEEN 26 AND 40 THEN '26-40' 
+            ELSE '40+' 
+        END AS age_categories
+    FROM customers
+)
 SELECT 
-    age_categories.age_category,
-    COALESCE(COUNT(customers.age), 0) AS count
-FROM 
-    (SELECT '16-25' AS age_category
-        UNION SELECT '26-40'
-        UNION SELECT '40+') AS age_categories
-LEFT JOIN 
-    customers ON 
-    CASE 
-        WHEN customers.age BETWEEN 16 AND 25 THEN '16-25' 
-        WHEN customers.age BETWEEN 26 AND 40 THEN '26-40' 
-        ELSE '40+' 
-    END = age_categories.age_category
-GROUP BY 
-    age_categories.age_category 
-ORDER BY 
-    age_categories.age_category ASC;
+    age_categories,
+    COUNT(*) AS count
+FROM tab_1
+GROUP BY age_categories
+order by age_categories;
 ---------------------
 
 --Во втором отчете предоставьте данные по количеству уникальных покупателей и выручке, которую они принесли. Сгруппируйте данные по дате, которая представлена в числовом виде ГОД-МЕСЯЦ. Итоговая таблица должна быть отсортирована по дате по возрастанию и содержать следующие поля:
